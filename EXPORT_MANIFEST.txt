@@ -1,3 +1,0 @@
-Sanitized Football Odds Predictor export
-Included source files: 184
-Excluded secrets, environment files, runtime logs, .git, dependencies, and build artifacts.
