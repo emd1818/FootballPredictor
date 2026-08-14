@@ -19,11 +19,34 @@ async function apiFootball(path, params) {
   return data.response || [];
 }
 
+const CLUB_AFFIXES = /\b(FC|CF|SC|AFC|AC|CD|SK|SV|AS|US|RC|CA|EC|IF|BK|IK|VV)\b/gi;
+
+function nameVariants(name) {
+  const variants = new Set();
+  const trimmed = name.trim();
+  variants.add(trimmed);
+
+  const noAffix = trimmed.replace(CLUB_AFFIXES, "").replace(/\s+/g, " ").trim();
+  if (noAffix && noAffix !== trimmed) variants.add(noAffix);
+
+  const words = trimmed.split(/\s+/);
+  if (words.length > 1) {
+    variants.add(words[words.length - 1]);
+    variants.add(words[0]);
+  }
+
+  return [...variants].filter(Boolean);
+}
+
 async function findTeamId(name) {
-  const teams = await apiFootball("/teams", { search: name });
-  if (!teams.length) return null;
-  const exact = teams.find(t => (t.team?.name || "").toLowerCase() === name.toLowerCase());
-  return (exact || teams[0]).team?.id || null;
+  for (const variant of nameVariants(name)) {
+    const teams = await apiFootball("/teams", { search: variant });
+    if (!teams.length) continue;
+    const exact = teams.find(t => (t.team?.name || "").toLowerCase() === variant.toLowerCase());
+    if (exact) return exact.team.id;
+    if (variant.length >= 4) return teams[0].team?.id || null;
+  }
+  return null;
 }
 
 function formScore(fixtures, teamId) {
