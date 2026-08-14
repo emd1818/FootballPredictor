@@ -1,23 +1,6 @@
 {
-  "name": "football-predictor-v2.6",
-  "version": "2.6.0",
+  "name": "football-predictor-v2-7",
+  "version": "2.7.0",
   "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0",
-    "check": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@vitejs/plugin-react": "^5.0.4",
-    "typescript": "^5.9.3",
-    "vite": "^7.1.7",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "lucide-react": "^0.453.0"
-  },
-  "devDependencies": {
-    "@vercel/node": "^5.4.0"
-  }
+  "scripts": { "build": "echo V2.7 static Vercel build ready" }
 }

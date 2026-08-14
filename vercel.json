@@ -1,11 +1,9 @@
 {
+  "version": 2,
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
-  "functions": {
-    "api/**/*.ts": {
-      "runtime": "nodejs22.x",
-      "maxDuration": 30
-    }
-  }
+  "outputDirectory": "public",
+  "rewrites": [
+    { "source": "/api/matches", "destination": "/api/matches" },
+    { "source": "/api/health", "destination": "/api/health" }
+  ]
 }

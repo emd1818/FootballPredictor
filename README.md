@@ -1,16 +1,20 @@
-# Football Predictor V2.6.1 — Vercel-ready real-data frontend
+# Football Predictor V2.7
 
-This is a clean, self-contained Vite + React + Vercel serverless build. It has explicit `client/`, `server/`, `shared/`, and `api/` directories.
+A minimal Vercel-ready production baseline focused on real upcoming football fixtures and bookmaker odds.
 
-## Real data
-- The Odds API: upcoming football fixtures and bookmaker H2H prices.
-- API-Football: reserved for enrichment; the current live screen does not fabricate team statistics when enrichment is unavailable.
+## Deploy
+1. Upload the root files to GitHub.
+2. In Vercel Project Settings → Environment Variables add:
+   - `ODDS_API_KEY`
+   - `API_FOOTBALL_KEY` (reserved for the next enrichment layer)
+3. Redeploy.
 
-## Environment
-Set `ODDS_API_KEY` in Vercel Project Settings → Environment Variables. `API_FOOTBALL_KEY` can also be set for the enrichment layer.
+The frontend is static. `/api/matches` is a Vercel serverless function and keeps `ODDS_API_KEY` server-side.
 
-## Important
-The live screen does not invent fixtures or odds. If the Odds API returns no events, the UI explicitly says so.
-
-## Local
-`npm install` then `npm run build`.
+## Behaviour
+- No fake fixtures.
+- No fake odds.
+- Empty API result remains empty.
+- Odds are best available bookmaker prices for 1X2.
+- Market probabilities are normalized bookmaker implied probabilities.
+- Data is cached briefly at the edge to reduce API consumption.
