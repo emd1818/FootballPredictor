@@ -2,7 +2,17 @@ import { redisGetJSON, redisSetJSON } from "../../lib/redis.js";
 
 const BASE = "https://v3.football.api-sports.io";
 
+// Same free-tier pacing as predictModel.js — keep well under ~10 req/min.
+const MIN_GAP_MS = 6500;
+let lastCallAt = 0;
+async function throttle() {
+  const wait = lastCallAt + MIN_GAP_MS - Date.now();
+  if (wait > 0) await new Promise(r => setTimeout(r, wait));
+  lastCallAt = Date.now();
+}
+
 async function apiFootball(path, params) {
+  await throttle();
   const url = new URL(BASE + path);
   for (const [k, v] of Object.entries(params || {})) {
     if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, v);
@@ -14,6 +24,10 @@ async function apiFootball(path, params) {
   if (data.errors && Object.keys(data.errors).length) throw new Error(JSON.stringify(data.errors));
   return data.response || [];
 }
+
+// Cap how many results we check per invocation, so a single run of this
+// once-a-day cron can't run past Vercel's execution time limit.
+const BATCH_LIMIT = 8;
 
 function actualOutcome(homeGoals, awayGoals) {
   if (homeGoals > awayGoals) return "home";
@@ -37,15 +51,19 @@ export default async function handler(req, res) {
 
     const now = Date.now();
     const READY_BUFFER_MS = 150 * 60 * 1000; // give the match 150 minutes to finish
+    let apiCallsUsed = 0;
 
     for (const p of pending) {
       const kickoff = new Date(p.commenceTime).getTime();
-      if (!Number.isFinite(kickoff) || now - kickoff < READY_BUFFER_MS) {
+      const isReady = Number.isFinite(kickoff) && now - kickoff >= READY_BUFFER_MS;
+
+      if (!isReady || apiCallsUsed >= BATCH_LIMIT) {
         stillPending.push(p);
         continue;
       }
 
       try {
+        apiCallsUsed++;
         const dateStr = new Date(p.commenceTime).toISOString().slice(0, 10);
         const fixtures = await apiFootball("/fixtures", { team: p.homeId, date: dateStr });
         const fixture = fixtures.find(f => f.teams?.away?.id === p.awayId || f.teams?.home?.id === p.homeId);
