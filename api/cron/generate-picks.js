@@ -4,7 +4,7 @@ import { redisGetJSON, redisSetJSON } from "../../lib/redis.js";
 
 // How many candidate matches to actually run the model on per day.
 // Kept modest to respect the API-Football free-tier daily quota (100 req/day).
-const CANDIDATE_LIMIT = 12;
+const CANDIDATE_LIMIT = 8;
 
 export default async function handler(req, res) {
   // Protect the endpoint: only Vercel Cron (or someone with the secret) can trigger it.
@@ -32,6 +32,7 @@ export default async function handler(req, res) {
       const awayOdds = bestPrice(m, m.awayTeam);
 
       try {
+        await new Promise(r => setTimeout(r, 300)); // throttle between matches
         const result = await predictMatch(m.homeTeam, m.awayTeam, { home: homeOdds, draw: drawOdds, away: awayOdds });
         if (result.sampleSize < 2) continue; // too little real data to trust
 
