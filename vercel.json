@@ -2,8 +2,8 @@
   "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "public",
-  "rewrites": [
-    { "source": "/api/matches", "destination": "/api/matches" },
-    { "source": "/api/health", "destination": "/api/health" }
+  "crons": [
+    { "path": "/api/cron/generate-picks", "schedule": "0 6 * * *" },
+    { "path": "/api/cron/check-results", "schedule": "0 8 * * *" }
   ]
 }
