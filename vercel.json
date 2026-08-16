@@ -2,6 +2,10 @@
   "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "public",
+  "functions": {
+    "api/cron/generate-picks.js": { "maxDuration": 60 },
+    "api/cron/check-results.js": { "maxDuration": 60 }
+  },
   "crons": [
     { "path": "/api/cron/generate-picks", "schedule": "0 6 * * *" },
     { "path": "/api/cron/check-results", "schedule": "0 8 * * *" }
